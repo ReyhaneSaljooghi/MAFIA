@@ -9,6 +9,7 @@ public class Game {
    static  boolean noonedied=false;
     static  int Daynumber=0 ;
     static  int Nightnumber=0;
+    static String result=null;
     public static void main(String[] args) {
 
         String roles[]={"Joker", "villager", "detective", "doctor", "bulletproof", "mafia", "godfather", "silencer"};
@@ -17,7 +18,7 @@ public class Game {
         String namesOfPlayers;
 
 
-        while (true) {
+     outer:   while (true) {
             String order = input.nextLine();
             if (order.equals("create_game") && !gameIsCreated) {
                 gameIsCreated = true;
@@ -60,35 +61,46 @@ public class Game {
                 }
                 else {
                     /*represent roles in the begining of the game*/
-                    if(Daynumber==0) {
-                        for (int i = 0; i < numbersOfplayers; i++) {
+                    if (Daynumber == 0) {
+                        for (int i = 0; i <=numbersOfplayers; i++) {
                             System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
                         }
                     }
+                    else System.out.println(result);
                     gameIsStarted = true;
                     System.out.println("Ready? Set! Go");
 
-                    Daynumber++;
-                    System.out.println("Day"+Daynumber);
-                    Day();
-                    if (jokerwon) {
-                        System.out.println("Joker won!");
-                        break;
-                    }
-                    if (noonedied) {
-                        System.out.println("nobody died");
-                    }
-                    for (int i = 0; i <= numbersOfplayers; i++) {
-                        if (players[i].getNumbersOfVotes() == maxvote(players)) {
-                            players[i].isKilled = true;
-                            System.out.println(players[i].name + "died");
+                    while (true) {
+                        Daynumber++;
+                        System.out.println("Day" + Daynumber);
+                        Day();
+                        if (jokerwon) {
+                            System.out.println("Joker won!");
+                            break outer;
                         }
+                        if (noonedied) {
+                            System.out.println("nobody died");
+                        }
+                        for (int i = 0; i <= numbersOfplayers; i++) {
+                            if (players[i].getNumbersOfVotes() == maxvote(players)) {
+                                players[i].isKilled = true;
+                                System.out.println(players[i].name + "died");
+                            }
+
+                        }
+                        resetvote(players);
+                        //Night
+                        Nightnumber++;
+                        System.out.println("Night" + Nightnumber);
+                        if (Nightnumber == 0) {
+                            for (int i = 0; i <= numbersOfplayers; i++) {
+                                if(!players[i].isKilled&&players[i].wakeupAtNight)
+                                System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
+                            }
+                        }
+                        Night();
 
                     }
-                    //Night
-                    Nightnumber++;
-                    System.out.println("Night"+Nightnumber);
-
                 }
             }
         }
@@ -132,7 +144,7 @@ public class Game {
        while (true){
             String voterOrEnd=input.next();
             if (voterOrEnd.equals("end_vote")) {
-                if (checkifvotesEqual(players)) {
+                if (checkifvotesEqual(players)>=2) {
                     noonedied=true;
                     break;
                 }
@@ -166,9 +178,98 @@ public class Game {
 
     }
     public static void Night(){
+        result=null;
+        resetvote(players);
+        int actionsOfsilencer=0;
+        boolean detectiveAsked=false;
+        while (true){
+
+            String doer=input.next();
+            String taker=input.next();
+            if (findplayer(doer).isKilled||findplayer(taker).isKilled) {
+                System.out.println("user is dead");
+                continue;
+            }
+            if(!findplayer(doer).wakeupAtNight||!findplayer(taker).wakeupAtNight) {
+                System.out.println("user can not wake up during night");
+                continue;
+            }
+            if (findplayer(doer) instanceof mafia){
+                if (findplayer(taker)==null) {
+                    System.out.println("user not joined");
+                    continue;
+                }
+                if (findplayer(taker).isKilled){
+                    System.out.println("votee already dead");
+                    continue;
+                }
+                findplayer(taker).numbersOfVotes++;
+                result+="mafia tried to kill"+findplayer(taker).name+"\n";
+            }
+            if (findplayer(doer) instanceof detective){
+                if (detectiveAsked){
+                    System.out.println("detective has already asked");
+                    continue;
+                }
+                detectiveAsked=true;
+               ((detective)findplayer(doer)).checkIsMafia(findplayer(taker));
+               continue;
+            }
+            if (findplayer(doer) instanceof doctor){
+                findplayer(taker).isSavedByDoctor=true;
+                continue;
+            }
+
+            if (findplayer(doer)instanceof Silencer){
+                if (actionsOfsilencer==0) {
+                    findplayer(taker).isSilent = true;
+                    actionsOfsilencer++;
+                    result+="Silenced"+findplayer(taker).name+"\n";
+                    continue;
+                }
+
+            }
+            if (doer.equals("end_Night")) {
+                    int numbersofequalvotes = checkifvotesEqual(players);
+                    if (numbersofequalvotes > 2) {
+                        break;
+                    }
+                    else if(numbersofequalvotes==2){
+                        for (int i=0;i<=numbersOfplayers;i++) {
+                            if (players[i].getNumbersOfVotes() == maxvote(players)) {
+                                for (int j = i + 1; j <= numbersOfplayers; j++) {
+                                    if (players[j].getNumbersOfVotes() == maxvote(players)&&players[j].isSavedByDoctor) {
+                                        result += players[i].name + "is killed"+"\n";
+                                        break;
+                                    }
+                                    if (players[j].getNumbersOfVotes() == maxvote(players)&&players[i].isSavedByDoctor) {
+                                        result += players[j].name + "is killed"+"\n";
+                                        break;
+                                    }
+
+                                }
+
+                            }
+                        }
+                    }
+                    else {
+                        for (int i = 0; i <= numbersOfplayers; i++) {
+                            if (players[i].getNumbersOfVotes() == maxvote(players)) {
+                                players[i].isKilled = true;
+                                result += players[i].name + "is killed"+"\n";
+                                break;
+
+                            }
+
+                        }
+                    }
+            }
+
+        }
 
 
     }
+
     public static int maxvote(Player[]players){
 
         int max=0;
@@ -179,14 +280,14 @@ public class Game {
         }
             return max;
     }
-    public static boolean checkifvotesEqual(Player []players){
+    public static int checkifvotesEqual(Player []players){
         int max=maxvote(players);
         int nums=0;
         for (Player it:players){
             if (it.getNumbersOfVotes()==max)
                 nums++;
         }
-        return nums>1;
+        return nums;
     }
     public static Player findplayer(String name){
         for (Player it:players){
