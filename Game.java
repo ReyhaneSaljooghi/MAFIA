@@ -9,7 +9,7 @@ public class Game {
     static  boolean noonedied=false;
     static  int Daynumber=0 ;
     static  int Nightnumber=0;
-    static String result=null;
+    static String result="";
     public static void main(String[] args) {
 
         String roles[]={"Joker", "villager", "detective", "doctor", "bulletproof", "mafia", "godfather", "silencer"};
@@ -69,13 +69,18 @@ public class Game {
                             System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
                         }
                     }
-                    else System.out.println(result);
                     gameIsStarted = true;
                     System.out.println("Ready? Set! Go");
 
                     while (true) {
                         Daynumber++;
                         System.out.println("Day" + Daynumber);
+                        ///for debug
+                        for (int i=0;i<numbersOfplayers;i++)
+                        System.out.println("votes:"+players[i].getNumbersOfVotes());
+                        ///
+                        System.out.println(result);
+                        resetvote(players);
                         Day();
                         if (jokerwon) {
                             System.out.println("Joker won!");
@@ -84,6 +89,7 @@ public class Game {
                         if (noonedied) {
                             System.out.println("nobody died");
                         }
+
                         for (int i = 0; i <numbersOfplayers; i++) {
                             if (players[i].getNumbersOfVotes() == maxvote(players)&&!noonedied) {
                                 players[i].isKilled = true;
@@ -92,14 +98,13 @@ public class Game {
 
                         }
                         resetvote(players);
-                        //Night
+                        //Night statrts
                         Nightnumber++;
                         System.out.println("Night" + Nightnumber);
                         for (int i = 0; i < numbersOfplayers; i++) {
                             if(!players[i].isKilled&&players[i].wakeupAtNight)
                                 System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
                         }
-
                         Night();
                         if (numbersOfMafia()>=numbersOfvillager()){
                             System.out.println("Mafia won!");
@@ -167,6 +172,7 @@ public class Game {
 
                         }
                 }
+
                 break outer;
 
             }
@@ -191,19 +197,68 @@ public class Game {
 
     }
     public static void Night(){
-        result=null;
-        resetvote(players);
+        result="";
         int actionsOfsilencer=0;
         boolean detectiveAsked=false;
-        while (true){
+        outer:while (true){
 
             String doer=input.next();
-            String taker=input.next();
+            if (doer.equals("end_Night")) {
+                int numbersofequalvotes = checkifvotesEqual(players);
+                if (numbersofequalvotes > 2) {
+                    break;
+                }
+                else if(numbersofequalvotes==2){
+                    for (int i=0;i<=numbersOfplayers;i++) {
+                        if (players[i].getNumbersOfVotes() == maxvote(players)) {
+                            for (int j = i + 1; j < numbersOfplayers; j++) {
+                                if (players[j].getNumbersOfVotes() == maxvote(players)&&players[j].isSavedByDoctor) {
+                                    result += players[i].name + " is killed"+"\n";
+                                    break outer;
+                                }
+                                if (players[j].getNumbersOfVotes() == maxvote(players)&&players[i].isSavedByDoctor) {
+                                    result += players[j].name + " is killed"+"\n";
+                                    break outer;
+                                }
+
+                            }
+
+                        }
+                    }
+                }
+                else {
+                    for (int i = 0; i < numbersOfplayers; i++) {
+                        if (players[i].getNumbersOfVotes() == maxvote(players)) {
+                            if(players[i]instanceof bulletproof){
+                                if (((bulletproof) players[i]).oneMorelife==1){
+                                    ((bulletproof) players[i]).oneMorelife=0;
+                                    break outer;
+                                }
+                                else {
+                                    players[i].isKilled = true;
+                                    result += players[i].name + " is killed" + "\n";
+                                    break outer;
+                                }
+                            }
+                            if (!players[i].isSavedByDoctor) {
+                                players[i].isKilled = true;
+                                result += players[i].name + " is killed" + "\n";
+                                break outer;
+                            }
+                        }
+                        break outer;
+
+                    }
+                }
+            }
+
+            String taker1=input.next();
+            String[]split=taker1.split(" ");
+            String taker=split[split.length-1];
             if (findplayer(doer).isKilled||findplayer(taker).isKilled) {
                 System.out.println("user is dead");
                 continue;
             }
-            System.out.println();
             if(!findplayer(doer).wakeupAtNight) {
                 System.out.println("user can not wake up during night");
                 continue;
@@ -226,8 +281,10 @@ public class Game {
                     System.out.println("votee already dead");
                     continue;
                 }
+
                 findplayer(taker).numbersOfVotes++;
-                result+="mafia tried to kill"+findplayer(taker).name+"\n";
+                result+="mafia tried to kill "+findplayer(taker).name+"\n";
+                continue ;
             }
             if (findplayer(doer) instanceof detective){
                 if (detectiveAsked){
@@ -243,44 +300,7 @@ public class Game {
                 continue;
             }
 
-            if (doer.equals("end_Night")) {
-                    int numbersofequalvotes = checkifvotesEqual(players);
-                    if (numbersofequalvotes > 2) {
-                        break;
-                    }
-                    else if(numbersofequalvotes==2){
-                        for (int i=0;i<=numbersOfplayers;i++) {
-                            if (players[i].getNumbersOfVotes() == maxvote(players)) {
-                                for (int j = i + 1; j < numbersOfplayers; j++) {
-                                    if (players[j].getNumbersOfVotes() == maxvote(players)&&players[j].isSavedByDoctor) {
-                                        result += players[i].name + "is killed"+"\n";
-                                        break;
-                                    }
-                                    if (players[j].getNumbersOfVotes() == maxvote(players)&&players[i].isSavedByDoctor) {
-                                        result += players[j].name + "is killed"+"\n";
-                                        break;
-                                    }
-
-                                }
-
-                            }
-                        }
-                    }
-                    else {
-                        for (int i = 0; i < numbersOfplayers; i++) {
-                            if (players[i].getNumbersOfVotes() == maxvote(players)) {
-                                players[i].isKilled = true;
-                                result += players[i].name + "is killed"+"\n";
-                                break;
-
-                            }
-
-                        }
-                    }
-            }
-
         }
-
 
     }
 
@@ -304,15 +324,15 @@ public class Game {
         return nums;
     }
     public static Player findplayer(String name){
-        for (Player it:players){
-            if (it.name.equals(name))
-                return it;
+        for (int i=0;i<numbersOfplayers;i++){
+            if (players[i].name.equals(name))
+                return players[i];
         }
         return  null;
     }
     public static void  resetvote(Player[]players){
-        for (Player it:players)
-            it.resetnemberofVotes();
+        for (int i=0;i<numbersOfplayers;i++)
+           players[i].resetnemberofVotes();
     }
     public static void get_game_state(){
         System.out.println("Mafia ="+numbersOfMafia());

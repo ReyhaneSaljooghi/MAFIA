@@ -1,5 +1,5 @@
 public class detective extends villager{
-    public boolean wakeupAtNight=true;
+    { super.wakeupAtNight=true; }
     detective(String name){
         super(name);
     }

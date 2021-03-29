@@ -5,4 +5,5 @@ public class Silencer extends mafia{
     public  void makeSilent(Player player){
         player.isSilent=true;
     }
+    { super.wakeupAtNight=true; }
 }
