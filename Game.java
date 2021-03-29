@@ -2,11 +2,11 @@ import java.util.Scanner;
 
 public class Game {
     static Scanner input = new Scanner(System.in);
-   static int numbersOfplayers=0;
-   static  Player[]players=null;
-   static  String[]names=null;
-   static boolean jokerwon=false;
-   static  boolean noonedied=false;
+    static int numbersOfplayers=0;
+    static  Player[]players=null;
+    static  String[]names=null;
+    static boolean jokerwon=false;
+    static  boolean noonedied=false;
     static  int Daynumber=0 ;
     static  int Nightnumber=0;
     static String result=null;
@@ -24,6 +24,9 @@ public class Game {
                 gameIsCreated = true;
                 namesOfPlayers = input.nextLine();
                 names = namesOfPlayers.split(" ");
+                for (String it:names)
+                    System.out.println(it);
+                System.out.println(names.length);
                players=new Player[names.length];
             }
             if (order.equals("assign_role")) {
@@ -62,7 +65,7 @@ public class Game {
                 else {
                     /*represent roles in the begining of the game*/
                     if (Daynumber == 0) {
-                        for (int i = 0; i <=numbersOfplayers; i++) {
+                        for (int i = 0; i <numbersOfplayers; i++) {
                             System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
                         }
                     }
@@ -81,10 +84,10 @@ public class Game {
                         if (noonedied) {
                             System.out.println("nobody died");
                         }
-                        for (int i = 0; i <= numbersOfplayers; i++) {
-                            if (players[i].getNumbersOfVotes() == maxvote(players)) {
+                        for (int i = 0; i <numbersOfplayers; i++) {
+                            if (players[i].getNumbersOfVotes() == maxvote(players)&&!noonedied) {
                                 players[i].isKilled = true;
-                                System.out.println(players[i].name + "died");
+                                System.out.println(players[i].name + " died");
                             }
 
                         }
@@ -92,17 +95,25 @@ public class Game {
                         //Night
                         Nightnumber++;
                         System.out.println("Night" + Nightnumber);
-                        if (Nightnumber == 0) {
-                            for (int i = 0; i <= numbersOfplayers; i++) {
-                                if(!players[i].isKilled&&players[i].wakeupAtNight)
+                        for (int i = 0; i < numbersOfplayers; i++) {
+                            if(!players[i].isKilled&&players[i].wakeupAtNight)
                                 System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
-                            }
                         }
+
                         Night();
+                        if (numbersOfMafia()>=numbersOfvillager()){
+                            System.out.println("Mafia won!");
+                            break ;
+                        }
+                        if (numbersOfMafia()==0){
+                            System.out.println("Villagers won!");
+                            break ;
+                        }
 
                     }
                 }
             }
+
         }
 
     }
@@ -141,20 +152,22 @@ public class Game {
         return  true;
     }
     public static void Day(){
-       while (true){
+     outer:  while (true){
             String voterOrEnd=input.next();
             if (voterOrEnd.equals("end_vote")) {
                 if (checkifvotesEqual(players)>=2) {
                     noonedied=true;
-                    break;
+                    break outer;
                 }
-                for (int i=0;i<=numbersOfplayers;i++) {
+                for (int i=0;i<numbersOfplayers;i++) {
                     if (players[i].getNumbersOfVotes() == maxvote(players))
                         if (players[i] instanceof Joker) {
                            jokerwon=true;
-                           break;
+                           break outer;
+
                         }
                 }
+                break outer;
 
             }
             String votee=input.next();
@@ -190,9 +203,19 @@ public class Game {
                 System.out.println("user is dead");
                 continue;
             }
-            if(!findplayer(doer).wakeupAtNight||!findplayer(taker).wakeupAtNight) {
+            System.out.println();
+            if(!findplayer(doer).wakeupAtNight) {
                 System.out.println("user can not wake up during night");
                 continue;
+            }
+            if (findplayer(doer)instanceof Silencer){
+                if (actionsOfsilencer==0) {
+                    findplayer(taker).isSilent = true;
+                    actionsOfsilencer++;
+                    result+="Silenced"+findplayer(taker).name+"\n";
+                    continue;
+                }
+
             }
             if (findplayer(doer) instanceof mafia){
                 if (findplayer(taker)==null) {
@@ -220,15 +243,6 @@ public class Game {
                 continue;
             }
 
-            if (findplayer(doer)instanceof Silencer){
-                if (actionsOfsilencer==0) {
-                    findplayer(taker).isSilent = true;
-                    actionsOfsilencer++;
-                    result+="Silenced"+findplayer(taker).name+"\n";
-                    continue;
-                }
-
-            }
             if (doer.equals("end_Night")) {
                     int numbersofequalvotes = checkifvotesEqual(players);
                     if (numbersofequalvotes > 2) {
@@ -237,7 +251,7 @@ public class Game {
                     else if(numbersofequalvotes==2){
                         for (int i=0;i<=numbersOfplayers;i++) {
                             if (players[i].getNumbersOfVotes() == maxvote(players)) {
-                                for (int j = i + 1; j <= numbersOfplayers; j++) {
+                                for (int j = i + 1; j < numbersOfplayers; j++) {
                                     if (players[j].getNumbersOfVotes() == maxvote(players)&&players[j].isSavedByDoctor) {
                                         result += players[i].name + "is killed"+"\n";
                                         break;
@@ -253,7 +267,7 @@ public class Game {
                         }
                     }
                     else {
-                        for (int i = 0; i <= numbersOfplayers; i++) {
+                        for (int i = 0; i < numbersOfplayers; i++) {
                             if (players[i].getNumbersOfVotes() == maxvote(players)) {
                                 players[i].isKilled = true;
                                 result += players[i].name + "is killed"+"\n";
@@ -273,8 +287,8 @@ public class Game {
     public static int maxvote(Player[]players){
 
         int max=0;
-        for(int i=0;i<=numbersOfplayers;i++) {
-            if (players[i].getNumbersOfVotes() > max) {
+        for(int i=0;i<numbersOfplayers;i++) {
+            if (players[i].getNumbersOfVotes() >= max) {
                 max = players[i].getNumbersOfVotes();
             }
         }
@@ -299,5 +313,26 @@ public class Game {
     public static void  resetvote(Player[]players){
         for (Player it:players)
             it.resetnemberofVotes();
+    }
+    public static void get_game_state(){
+        System.out.println("Mafia ="+numbersOfMafia());
+        System.out.println("Villager ="+numbersOfvillager());
+    }
+    public static int numbersOfMafia() {
+        int mafias=0;
+        for (int i = 0; i <numbersOfplayers; i++) {
+            if (!(players[i].isKilled) && players[i] instanceof mafia)
+                mafias++;
+        }
+        return mafias;
+    }
+    public static int numbersOfvillager() {
+        int villagers=0;
+
+        for (int i = 0; i < numbersOfplayers; i++) {
+            if (!(players[i].isKilled) && players[i] instanceof villager)
+                villagers++;
+        }
+        return villagers;
     }
 }
