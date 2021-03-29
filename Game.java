@@ -75,12 +75,10 @@ public class Game {
                     while (true) {
                         Daynumber++;
                         System.out.println("Day" + Daynumber);
-                        ///for debug
-                        for (int i=0;i<numbersOfplayers;i++)
-                        System.out.println("votes:"+players[i].getNumbersOfVotes());
-                        ///
                         System.out.println(result);
                         resetvote(players);
+                        jokerwon=false;
+                         noonedied=false;
                         Day();
                         if (jokerwon) {
                             System.out.println("Joker won!");
@@ -98,6 +96,7 @@ public class Game {
 
                         }
                         resetvote(players);
+                        resetSilent(players);
                         //Night statrts
                         Nightnumber++;
                         System.out.println("Night" + Nightnumber);
@@ -117,6 +116,9 @@ public class Game {
 
                     }
                 }
+            }
+            if (order.equals("get_game_state()")){
+                get_game_state();
             }
 
         }
@@ -159,7 +161,15 @@ public class Game {
     public static void Day(){
      outer:  while (true){
             String voterOrEnd=input.next();
+            if (voterOrEnd.equals("get_game_status")){
+                get_game_state();
+            }
             if (voterOrEnd.equals("end_vote")) {
+                ////debug
+                System.out.println("maxvote"+maxvote(players));
+                for (int i=0;i<numbersOfplayers;i++)
+                    System.out.print("votes: "+players[i].getNumbersOfVotes()+" ");
+                ///////
                 if (checkifvotesEqual(players)>=2) {
                     noonedied=true;
                     break outer;
@@ -203,6 +213,9 @@ public class Game {
         outer:while (true){
 
             String doer=input.next();
+            if (doer.equals("get_game_status")){
+                get_game_state();
+            }
             if (doer.equals("end_Night")) {
                 int numbersofequalvotes = checkifvotesEqual(players);
                 if (numbersofequalvotes > 2) {
@@ -317,8 +330,8 @@ public class Game {
     public static int checkifvotesEqual(Player []players){
         int max=maxvote(players);
         int nums=0;
-        for (Player it:players){
-            if (it.getNumbersOfVotes()==max)
+        for (int i=0;i<numbersOfplayers;i++){
+            if (players[i].getNumbersOfVotes()==max)
                 nums++;
         }
         return nums;
@@ -334,9 +347,13 @@ public class Game {
         for (int i=0;i<numbersOfplayers;i++)
            players[i].resetnemberofVotes();
     }
+    public static void  resetSilent(Player[]players){
+        for (int i=0;i<numbersOfplayers;i++)
+            players[i].isSilent=false;
+    }
     public static void get_game_state(){
-        System.out.println("Mafia ="+numbersOfMafia());
-        System.out.println("Villager ="+numbersOfvillager());
+        System.out.println("Mafia = "+numbersOfMafia());
+        System.out.println("Villager = "+numbersOfvillager());
     }
     public static int numbersOfMafia() {
         int mafias=0;
