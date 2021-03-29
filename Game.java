@@ -24,9 +24,6 @@ public class Game {
                 gameIsCreated = true;
                 namesOfPlayers = input.nextLine();
                 names = namesOfPlayers.split(" ");
-                for (String it:names)
-                    System.out.println(it);
-                System.out.println(names.length);
                players=new Player[names.length];
             }
             if (order.equals("assign_role")) {
@@ -76,6 +73,11 @@ public class Game {
                         Daynumber++;
                         System.out.println("Day" + Daynumber);
                         System.out.println(result);
+                        ////debug
+                        System.out.println("maxvote"+maxvote(players));
+                        for (int i=0;i<numbersOfplayers;i++)
+                            System.out.print("votes: "+players[i].getNumbersOfVotes()+" ");
+                        ///////
                         resetvote(players);
                         jokerwon=false;
                          noonedied=false;
@@ -217,50 +219,60 @@ public class Game {
                 get_game_state();
             }
             if (doer.equals("end_Night")) {
+                //debug
+                System.out.println("VARED ENDNIGHT SHOD");
                 int numbersofequalvotes = checkifvotesEqual(players);
                 if (numbersofequalvotes > 2) {
-                    break;
+                    return;
                 }
                 else if(numbersofequalvotes==2){
-                    for (int i=0;i<=numbersOfplayers;i++) {
+                    //debug
+                    System.out.println("vote barabar 2 nafar");
+                    //////
+                    for (int i=0;i<numbersOfplayers;i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
                             for (int j = i + 1; j < numbersOfplayers; j++) {
                                 if (players[j].getNumbersOfVotes() == maxvote(players)&&players[j].isSavedByDoctor) {
                                     result += players[i].name + " is killed"+"\n";
-                                    break outer;
+                                    return;
                                 }
                                 if (players[j].getNumbersOfVotes() == maxvote(players)&&players[i].isSavedByDoctor) {
                                     result += players[j].name + " is killed"+"\n";
-                                    break outer;
+                                   return;
                                 }
 
                             }
 
                         }
                     }
+                    return;
                 }
                 else {
+                    //debug
+                    System.out.println("VARED ELSE SHOD");
                     for (int i = 0; i < numbersOfplayers; i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
-                            if(players[i]instanceof bulletproof){
+                            if(players[i] instanceof bulletproof){
+
                                 if (((bulletproof) players[i]).oneMorelife==1){
                                     ((bulletproof) players[i]).oneMorelife=0;
-                                    break outer;
+                                     return;
                                 }
                                 else {
                                     players[i].isKilled = true;
                                     result += players[i].name + " is killed" + "\n";
-                                    break outer;
+                                    return;
                                 }
                             }
                             if (!players[i].isSavedByDoctor) {
+
                                 players[i].isKilled = true;
                                 result += players[i].name + " is killed" + "\n";
-                                break outer;
+                               return;
                             }
-                        }
-                        break outer;
+                            return;
 
+                        }
                     }
                 }
             }
@@ -280,7 +292,7 @@ public class Game {
                 if (actionsOfsilencer==0) {
                     findplayer(taker).isSilent = true;
                     actionsOfsilencer++;
-                    result+="Silenced"+findplayer(taker).name+"\n";
+                    result+="Silenced "+findplayer(taker).name+"\n";
                     continue;
                 }
 

@@ -1,6 +1,7 @@
 public abstract class Player {
     public boolean wakeupAtNight=false;
     String name;
+    public int oneMorelife=0;
     boolean isSavedByDoctor=false;
     boolean isKilled=false;
     boolean isSilent=false;
