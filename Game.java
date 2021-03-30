@@ -24,6 +24,7 @@ public class Game {
                 gameIsCreated = true;
                 namesOfPlayers = input.nextLine();
                 names = namesOfPlayers.split(" ");
+
                players=new Player[names.length];
             }
             if (order.equals("assign_role")) {
@@ -50,14 +51,17 @@ public class Game {
                 }
 
             if (order.equals("start_game")) {
-                if (!hasrole(players, numbersOfplayers)) {
+                if (!hasrole(players, names.length)) {
                     System.out.println("one or more player do not have a role");
+                    continue ;
                 }
                 else if (!gameIsCreated) {
                     System.out.println("no game created");
+                    continue ;
                 }
                 else if (gameIsStarted) {
                     System.out.println("game has already started");
+                    continue ;
                 }
                 else {
                     /*represent roles in the begining of the game*/
@@ -67,17 +71,12 @@ public class Game {
                         }
                     }
                     gameIsStarted = true;
-                    System.out.println("Ready? Set! Go");
+                    System.out.println("Hi!!!!Ready? Set! Go");
 
                     while (true) {
                         Daynumber++;
                         System.out.println("Day" + Daynumber);
                         System.out.println(result);
-                        ////debug
-                        System.out.println("maxvote"+maxvote(players));
-                        for (int i=0;i<numbersOfplayers;i++)
-                            System.out.print("votes: "+players[i].getNumbersOfVotes()+" ");
-                        ///////
                         resetvote(players);
                         jokerwon=false;
                          noonedied=false;
@@ -165,13 +164,9 @@ public class Game {
             String voterOrEnd=input.next();
             if (voterOrEnd.equals("get_game_status")){
                 get_game_state();
+                continue ;
             }
             if (voterOrEnd.equals("end_vote")) {
-                ////debug
-                System.out.println("maxvote"+maxvote(players));
-                for (int i=0;i<numbersOfplayers;i++)
-                    System.out.print("votes: "+players[i].getNumbersOfVotes()+" ");
-                ///////
                 if (checkifvotesEqual(players)>=2) {
                     noonedied=true;
                     break outer;
@@ -217,18 +212,14 @@ public class Game {
             String doer=input.next();
             if (doer.equals("get_game_status")){
                 get_game_state();
+                continue ;
             }
             if (doer.equals("end_Night")) {
-                //debug
-                System.out.println("VARED ENDNIGHT SHOD");
                 int numbersofequalvotes = checkifvotesEqual(players);
                 if (numbersofequalvotes > 2) {
                     return;
                 }
                 else if(numbersofequalvotes==2){
-                    //debug
-                    System.out.println("vote barabar 2 nafar");
-                    //////
                     for (int i=0;i<numbersOfplayers;i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
                             for (int j = i + 1; j < numbersOfplayers; j++) {
@@ -248,8 +239,7 @@ public class Game {
                     return;
                 }
                 else {
-                    //debug
-                    System.out.println("VARED ELSE SHOD");
+
                     for (int i = 0; i < numbersOfplayers; i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
                             if(players[i] instanceof bulletproof){
