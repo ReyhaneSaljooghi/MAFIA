@@ -11,7 +11,7 @@ public class Game {
     static  int Nightnumber=0;
     static String result="";
     public static void main(String[] args) {
-
+        //all the roles in the game
         String roles[]={"Joker", "villager", "detective", "doctor", "bulletproof", "mafia", "godfather", "silencer"};
         boolean gameIsCreated=false;
         boolean gameIsStarted=false;
@@ -20,6 +20,7 @@ public class Game {
 
      outer:   while (true) {
             String order = input.nextLine();
+            //This order creates a game
             if (order.equals("create_game") && !gameIsCreated) {
                 gameIsCreated = true;
                 namesOfPlayers = input.nextLine();
@@ -27,6 +28,7 @@ public class Game {
 
                players=new Player[names.length];
             }
+            //This part is for assigning roles
             if (order.equals("assign_role")) {
                 if (gameIsCreated == false) {
                     System.out.println("no game created");
@@ -34,22 +36,29 @@ public class Game {
                 }
 
                     String name = input.next();
+                  if(name.equals("get_game_state")){
+                    get_game_state();
+                    continue ;
+                  }
                     String role = input.next();
+                    //no user with this name
                     if (!nameexists(names, name)) {
                         System.out.println("user not found");
                         continue;
                     }
+                    //this role is not in the game
                     if (!roleexists(roles, role)) {
                         System.out.println("role not found");
                         continue;
                     }
+                    //the player is added to the array of players
                     if (nameexists(names, name) && roleexists(roles, role)) {
                         players[numbersOfplayers] = createrole(name, role);
                         numbersOfplayers++;
                         continue;
                     }
                 }
-
+            //the game starts
             if (order.equals("start_game")) {
                 if (!hasrole(players, names.length)) {
                     System.out.println("one or more player do not have a role");
@@ -72,7 +81,7 @@ public class Game {
                     }
                     gameIsStarted = true;
                     System.out.println("Hi!!!!Ready? Set! Go");
-
+                    /*The days and nights come after each other till the end of the game*/
                     while (true) {
                         Daynumber++;
                         System.out.println("Day" + Daynumber);
@@ -80,7 +89,9 @@ public class Game {
                         resetvote(players);
                         jokerwon=false;
                          noonedied=false;
+                         /*the method day is called*/
                         Day();
+                        /*if joker is killed in day*/
                         if (jokerwon) {
                             System.out.println("Joker won!");
                             break outer;
@@ -96,9 +107,19 @@ public class Game {
                             }
 
                         }
+                        //check if the game is finished int the end of day
+                        if (numbersOfMafia()>=numbersOfvillager()){
+                            System.out.println("Mafia won!");
+                            break ;
+                        }
+                        if (numbersOfMafia()==0){
+                            System.out.println("Villagers won!");
+                            break ;
+                        }
+                        //we reset vote and silent players in the end of the day
                         resetvote(players);
                         resetSilent(players);
-                        //Night statrts
+                        //Night starts
                         Nightnumber++;
                         System.out.println("Night" + Nightnumber);
                         for (int i = 0; i < numbersOfplayers; i++) {
@@ -106,6 +127,7 @@ public class Game {
                                 System.out.println(players[i].name + ":" + players[i].getClass().getSimpleName());
                         }
                         Night();
+                        //check if the game is finished int the end of day
                         if (numbersOfMafia()>=numbersOfvillager()){
                             System.out.println("Mafia won!");
                             break ;
@@ -118,13 +140,15 @@ public class Game {
                     }
                 }
             }
-            if (order.equals("get_game_state()")){
+            if (order.equals("get_game_state")){
                 get_game_state();
+                continue ;
             }
 
         }
 
     }
+    //new each player with her/his role
     public static Player createrole(String name,String role){
         switch (role){
             case "Joker":return new Joker(name);
@@ -138,6 +162,7 @@ public class Game {
         }
         return  null;
     }
+    //check if the name is in the array name of players
     public static  boolean nameexists(String[]names,String name){
         for (String it:names){
             if (name.equals(it))
@@ -145,6 +170,7 @@ public class Game {
         }
         return  false;
     }
+    //check if the role is in game
     public static boolean roleexists(String[]roles,String role){
         for (String it:roles){
             if (role.equals(it))
@@ -159,6 +185,7 @@ public class Game {
         }
         return  true;
     }
+
     public static void Day(){
      outer:  while (true){
             String voterOrEnd=input.next();
@@ -216,9 +243,11 @@ public class Game {
             }
             if (doer.equals("end_Night")) {
                 int numbersofequalvotes = checkifvotesEqual(players);
+                //no one die
                 if (numbersofequalvotes > 2) {
                     return;
                 }
+                //whn the votes of 2 players are the same we check if one of them is saved or not
                 else if(numbersofequalvotes==2){
                     for (int i=0;i<numbersOfplayers;i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
@@ -243,7 +272,7 @@ public class Game {
                     for (int i = 0; i < numbersOfplayers; i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
                             if(players[i] instanceof bulletproof){
-
+                                //bulletproof has one life in the game
                                 if (((bulletproof) players[i]).oneMorelife==1){
                                     ((bulletproof) players[i]).oneMorelife=0;
                                      return;
@@ -279,6 +308,7 @@ public class Game {
                 continue;
             }
             if (findplayer(doer)instanceof Silencer){
+                //this plaer silent other players
                 if (actionsOfsilencer==0) {
                     findplayer(taker).isSilent = true;
                     actionsOfsilencer++;
@@ -302,6 +332,7 @@ public class Game {
                 continue ;
             }
             if (findplayer(doer) instanceof detective){
+                //if the detective ask for more than one time at the night
                 if (detectiveAsked){
                     System.out.println("detective has already asked");
                     continue;
