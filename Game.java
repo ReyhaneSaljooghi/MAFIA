@@ -110,11 +110,11 @@ public class Game {
                         //check if the game is finished int the end of day
                         if (numbersOfMafia()>=numbersOfvillager()){
                             System.out.println("Mafia won!");
-                            break ;
+                            break outer;
                         }
                         if (numbersOfMafia()==0){
                             System.out.println("Villagers won!");
-                            break ;
+                            break outer;
                         }
                         //we reset vote and silent players in the end of the day
                         resetvote(players);
@@ -130,17 +130,17 @@ public class Game {
                         //check if the game is finished int the end of day
                         if (numbersOfMafia()>=numbersOfvillager()){
                             System.out.println("Mafia won!");
-                            break ;
+                            break outer;
                         }
                         if (numbersOfMafia()==0){
                             System.out.println("Villagers won!");
-                            break ;
+                            break outer;
                         }
 
                     }
                 }
             }
-            if (order.equals("get_game_state")){
+            if (order.equals("get_game_state ")){
                 get_game_state();
                 continue ;
             }
@@ -253,10 +253,12 @@ public class Game {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
                             for (int j = i + 1; j < numbersOfplayers; j++) {
                                 if (players[j].getNumbersOfVotes() == maxvote(players)&&players[j].isSavedByDoctor) {
+                                    players[i].isKilled=true;
                                     result += players[i].name + " is killed"+"\n";
                                     return;
                                 }
                                 if (players[j].getNumbersOfVotes() == maxvote(players)&&players[i].isSavedByDoctor) {
+                                    players[j].isKilled=true;
                                     result += players[j].name + " is killed"+"\n";
                                    return;
                                 }
