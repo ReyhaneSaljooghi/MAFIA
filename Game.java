@@ -10,6 +10,7 @@ public class Game {
     static  int Daynumber=0 ;
     static  int Nightnumber=0;
     static String result="";
+    static String triedtokill="";
     public static void main(String[] args) {
         //all the roles in the game
         String roles[]={"Joker", "villager", "detective", "doctor", "bulletproof", "mafia", "godfather", "silencer"};
@@ -241,13 +242,22 @@ public class Game {
                 get_game_state();
                 continue ;
             }
+            ///////////////////////////////
             if (doer.equals("end_Night")) {
+                for (int i=0;i<numbersOfplayers;i++){
+                    if (players[i]instanceof mafia){
+                        if (((mafia) players[i]).numvoteesatnight!=0){
+                            ThelastvoteOfmafia((mafia)players[i]);
+                        }
+                    }
+                }
+                ///////////////
                 int numbersofequalvotes = checkifvotesEqual(players);
                 //no one die
                 if (numbersofequalvotes > 2) {
                     return;
                 }
-                //whn the votes of 2 players are the same we check if one of them is saved or not
+                //when the votes of 2 players are the same we check if one of them is saved or not
                 else if(numbersofequalvotes==2){
                     for (int i=0;i<numbersOfplayers;i++) {
                         if (players[i].getNumbersOfVotes() == maxvote(players)) {
@@ -294,6 +304,8 @@ public class Game {
                             return;
 
                         }
+                        ///addd
+                        ///return;
                     }
                 }
             }
@@ -328,9 +340,12 @@ public class Game {
                     System.out.println("votee already dead");
                     continue;
                 }
-
-                findplayer(taker).numbersOfVotes++;
-                result+="mafia tried to kill "+findplayer(taker).name+"\n";
+                ///////////
+               ((mafia) findplayer(doer)).votees[((mafia) findplayer(doer)).numvoteesatnight]=taker;
+                ((mafia) findplayer(doer)).numvoteesatnight++;
+                ////////////
+                //findplayer(taker).numbersOfVotes++;
+               // result+="mafia tried to kill "+findplayer(taker).name+"\n";
                 continue ;
             }
             if (findplayer(doer) instanceof detective){
@@ -406,6 +421,10 @@ public class Game {
                 villagers++;
         }
         return villagers;
+    }
+    public  static void ThelastvoteOfmafia(mafia a){
+
+        (findplayer(a.votees[a.numvoteesatnight-1])).numbersOfVotes++;
     }
     /*https://github.com/ReyhaneSaljooghi/Mafia-.git*/
 }
